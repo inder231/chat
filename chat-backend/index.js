@@ -43,6 +43,7 @@ app.use(
       httpOnly: true,
       // it allow cookies to be set when we both are no same domain, but in production we need to be none and in development to be lax
       sameSite: process.env.ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 5, // cookie expired after 5min
     },
   })
 );

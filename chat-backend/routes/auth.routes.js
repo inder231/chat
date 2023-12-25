@@ -6,24 +6,41 @@ const bcrypt = require("bcrypt");
 
 const router = express.Router();
 
-router.post("/login", async (req, res, next) => {
-  try {
-    validateForm(req, res, next);
-    const { username, password } = req.body;
-    const existingUser = await UserModel.findOne({ username });
-    if (!existingUser) {
-      return next(createError(404, "Please register!"));
+router
+  .route("/login")
+  .get(async (req, res, next) => {
+    if (req.session?.user && req.session?.user?.username) {
+      console.log("Logged in");
+      return res.json({ loggedIn: true, username: req.session.user.username });
+    } else {
+      return res.json({ loggedIn: false });
     }
-    const isValidPassword = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isValidPassword) return next(createError(400, "Invalid credentials!"));
-    return res.status(200).json({ message: "Success", username });
-  } catch (error) {
-    next(createError.InternalServerError(error.message));
-  }
-});
+  })
+  .post(async (req, res, next) => {
+    try {
+      validateForm(req, res, next);
+      const { username, password } = req.body;
+      const existingUser = await UserModel.findOne({ username });
+      if (!existingUser) {
+        return next(createError(404, "Please register!"));
+      }
+      const isValidPassword = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+      if (!isValidPassword)
+        return next(createError(400, "Invalid credentials!"));
+      req.session.user = {
+        username,
+        id: existingUser._id,
+      };
+      return res
+        .status(200)
+        .json({ message: "Success", username, loggedIn: true });
+    } catch (error) {
+      next(createError.InternalServerError(error.message));
+    }
+  });
 
 router.post("/signup", async (req, res, next) => {
   try {
@@ -40,7 +57,9 @@ router.post("/signup", async (req, res, next) => {
       username,
       id: user._id,
     };
-    return res.status(201).json({ message: "Success", username });
+    return res
+      .status(201)
+      .json({ message: "Success", username, loggedIn: true });
   } catch (error) {
     next(createError.InternalServerError(error.message));
   }
