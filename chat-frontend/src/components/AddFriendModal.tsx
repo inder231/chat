@@ -1,5 +1,6 @@
 import {
   Button,
+  Heading,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -11,6 +12,8 @@ import {
 import * as Yup from "yup";
 import TextField from "./TextField";
 import { Form, Formik } from "formik";
+import socket from "../socket";
+import { useState } from "react";
 
 const friendSchema = Yup.object({
   friendName: Yup.string()
@@ -20,6 +23,7 @@ const friendSchema = Yup.object({
 });
 
 const AddFriendModal = ({ isOpen, onClose }) => {
+  const [error, setError] = useState<string>("");
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
@@ -30,12 +34,26 @@ const AddFriendModal = ({ isOpen, onClose }) => {
           initialValues={{ friendName: "" }}
           onSubmit={(values) => {
             console.log("Values", values);
-            onClose();
+            socket.emit(
+              "add_friend",
+              values.friendName,
+              ({ errorMsg, done }) => {
+                // this callback will be called by server, but executed here
+                if (done) {
+                  onClose();
+                  return;
+                }
+                setError(errorMsg);
+              }
+            );
           }}
           validationSchema={friendSchema}
         >
           <Form>
             <ModalBody>
+              <Heading as="p" size="sm" color="red.500" textAlign="center">
+                {error}
+              </Heading>
               <TextField
                 name="friendName"
                 placeholder="Enter username..."
