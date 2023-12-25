@@ -22,6 +22,7 @@ const validateForm = (req, res, next) => {
     })
     .then((valid) => {
       if (valid) {
+        console.log("Data validation successful!")
         next();
       } else {
         return next(createError(422));

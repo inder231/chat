@@ -5,11 +5,15 @@ const {
   verifyLogin,
   handleSignup,
 } = require("../controllers/auth.controller");
+const { rateLimiter } = require("../controllers/rateLimiter");
 
 const router = express.Router();
 
-router.route("/login").get(verifyLogin).post(validateForm, handleLogin);
+router
+  .route("/login")
+  .get(verifyLogin)
+  .post(rateLimiter(60, 10), validateForm, handleLogin);
 
-router.post("/signup", validateForm, handleSignup);
+router.post("/signup", rateLimiter(60, 10), validateForm, handleSignup);
 
 module.exports = router;
