@@ -8,7 +8,6 @@ import { Field, useField } from "formik";
 
 const TextField = ({ label, ...props }) => {
   const [field, meta] = useField(props);
-  console.log(field, props);
   return (
     <FormControl isInvalid={meta.touched && meta.error}>
       <FormLabel>{label}</FormLabel>

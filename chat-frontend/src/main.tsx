@@ -4,14 +4,17 @@ import App from "./App.tsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import { ColorModeScript } from "@chakra-ui/color-mode";
 import theme from "./theme.ts";
-import { RouterProvider } from "react-router-dom";
-import router from "./components/routes.tsx";
+import UserContext from "./context/AccountContext.tsx";
+import { BrowserRouter } from "react-router-dom";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-    <RouterProvider router={router} />
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <App />
+      <BrowserRouter>
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <UserContext>
+          <App />
+        </UserContext>
+      </BrowserRouter>
     </ChakraProvider>
   </React.StrictMode>
 );
