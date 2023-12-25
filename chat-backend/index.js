@@ -6,9 +6,32 @@ const createError = require("http-errors");
 const morgan = require("morgan");
 const session = require("express-session");
 require("dotenv").config();
-
 const authRouter = require("./routes/auth.routes");
 const { connection } = require("./config/db");
+const Redis = require("ioredis");
+const RedisStore = require("connect-redis").default; // pass session here..
+
+const redisConfig = {
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+};
+
+let redisClient = null;
+
+const createRedisConnection = () => {
+  redisClient = new Redis(redisConfig);
+  redisClient.on("connect", () => {
+    console.log("Connected to Redis");
+  });
+  redisClient.on("error", (error) => {
+    console.error("Redis conection error:", error);
+  });
+};
+if (!redisClient) {
+  createRedisConnection();
+}
 
 const app = express();
 
@@ -36,6 +59,7 @@ app.use(
     secret: process.env.COOKIE_SECRET,
     credentials: true,
     name: "sid",
+    store: new RedisStore({ client: redisClient }),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -64,7 +88,7 @@ app.use((err, req, res, next) => {
 
   res
     .status(err.status || 500)
-    .send({ message: err.message || "Internal server error!" });
+    .json({ message: err.message || "Internal server error!" });
 });
 
 (() => {

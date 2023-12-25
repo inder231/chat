@@ -10,7 +10,6 @@ router
   .route("/login")
   .get(async (req, res, next) => {
     if (req.session?.user && req.session?.user?.username) {
-      console.log("Logged in");
       return res.json({ loggedIn: true, username: req.session.user.username });
     } else {
       return res.json({ loggedIn: false });
@@ -22,7 +21,7 @@ router
       const { username, password } = req.body;
       const existingUser = await UserModel.findOne({ username });
       if (!existingUser) {
-        return next(createError(404, "Please register!"));
+        return next(createError(400, "Please register!"));
       }
       const isValidPassword = await bcrypt.compare(
         password,
@@ -48,7 +47,7 @@ router.post("/signup", async (req, res, next) => {
     const { username, password } = req.body;
     const existingUser = await UserModel.findOne({ username });
     if (existingUser) {
-      return next(createError(404, "Username already taken!"));
+      return next(createError(400, "Username already taken!"));
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new UserModel({ username, password: hashedPassword });
