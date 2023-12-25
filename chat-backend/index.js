@@ -11,6 +11,7 @@ const {
   wrap,
   corsConfig,
 } = require("./controllers/serverController");
+const { authorizeUser, initializeUser, addFriend } = require("./controllers/socketController");
 
 const app = express();
 
@@ -30,8 +31,15 @@ app.use("/auth", authRouter);
 
 // <------  ----- io -----  ------>
 io.use(wrap(sessionMiddleware));
+// Error handler ----
+io.use(authorizeUser);
 io.on("connect", (socket) => {
-  console.log(socket.request.session);
+  initializeUser(socket);
+
+  // add_friend
+  socket.on("add_friend",(data)=>{
+    console.log(data);
+  })
 });
 
 // catch 404 and forward to error handler
