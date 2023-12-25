@@ -1,14 +1,11 @@
-import './App.css'
-import ToggleColorMode from './components/ToggleColorMode'
+import ToggleColorMode from "./components/ToggleColorMode";
 
 function App() {
-
   return (
     <>
-     hey there!
-     <ToggleColorMode/>
+      <ToggleColorMode />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
