@@ -13,7 +13,8 @@ import * as Yup from "yup";
 import TextField from "./TextField";
 import { Form, Formik } from "formik";
 import socket from "../socket";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
+import { FriendContext, IFriend } from "../pages/Home";
 
 const friendSchema = Yup.object({
   friendName: Yup.string()
@@ -27,7 +28,8 @@ const AddFriendModal = ({ isOpen, onClose }) => {
   const closeModal = useCallback(() => {
     setError("");
     onClose();
-  },[onClose]);
+  }, [onClose]);
+  const { setFriendList } = useContext(FriendContext);
   return (
     <Modal isOpen={isOpen} onClose={closeModal} isCentered>
       <ModalOverlay />
@@ -37,13 +39,21 @@ const AddFriendModal = ({ isOpen, onClose }) => {
         <Formik
           initialValues={{ friendName: "" }}
           onSubmit={(values) => {
-            console.log("Values", values);
             socket.emit(
               "add_friend",
               values.friendName,
-              ({ errorMsg, done }) => {
+              ({
+                errorMsg,
+                done,
+                newFriend,
+              }: {
+                errorMsg: string;
+                done: boolean;
+                newFriend: IFriend;
+              }) => {
                 // this callback will be called by server, but executed here
                 if (done) {
+                  setFriendList((prev: IFriend[]) => [newFriend, ...prev]);
                   closeModal();
                   return;
                 }
