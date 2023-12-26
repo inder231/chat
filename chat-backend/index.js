@@ -37,9 +37,7 @@ io.on("connect", (socket) => {
   initializeUser(socket);
 
   // add_friend
-  socket.on("add_friend",(data)=>{
-    console.log(data);
-  })
+  socket.on("add_friend",(friendName,cb)=>addFriend(socket,friendName,cb))
 });
 
 // catch 404 and forward to error handler

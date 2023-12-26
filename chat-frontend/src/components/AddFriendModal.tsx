@@ -13,7 +13,7 @@ import * as Yup from "yup";
 import TextField from "./TextField";
 import { Form, Formik } from "formik";
 import socket from "../socket";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 const friendSchema = Yup.object({
   friendName: Yup.string()
@@ -24,8 +24,12 @@ const friendSchema = Yup.object({
 
 const AddFriendModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState<string>("");
+  const closeModal = useCallback(() => {
+    setError("");
+    onClose();
+  },[onClose]);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOpen} onClose={closeModal} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Add Friend</ModalHeader>
@@ -40,7 +44,7 @@ const AddFriendModal = ({ isOpen, onClose }) => {
               ({ errorMsg, done }) => {
                 // this callback will be called by server, but executed here
                 if (done) {
-                  onClose();
+                  closeModal();
                   return;
                 }
                 setError(errorMsg);
