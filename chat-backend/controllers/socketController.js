@@ -21,7 +21,7 @@ module.exports = {
       "userId",
       socket.user.id,
       "connected",
-      true
+      1
     );
     // get user's friends list
     const friendsList = await redisClient.lrange(
@@ -29,14 +29,32 @@ module.exports = {
       0,
       -1
     );
+    // get parsed friend list [...,{username:"",userId:"",connected:""},....]
     const parsedFriendList = await parseFriendList(friendsList);
+    // get friends room details
     const friendRooms = parsedFriendList.map((friend) => friend.userId);
     if (friendRooms.length > 0) {
-      socket.to(friendRooms).emit("connected", true, socket.user.username);
+      // console.log("Emitting to my friends that I am online")
+      socket.to(friendRooms).emit("connected", '1', socket.user.username);
     }
 
     //-----emit friends list [...,{username:string,userId:ObjectId,connected:boolean},...] -----
     socket.emit("friends", parsedFriendList);
+
+    // send all messages
+    const msgQuery = await redisClient.lrange(
+      `chat:${socket.user.id}`,
+      0,
+      -1
+    );
+    // to.from.format
+    const messages = msgQuery.map((msgStr) => {
+      const parsedStr = msgStr.split(".");
+      return { to: parsedStr[0], from: parsedStr[1], content: parsedStr[2] };
+    });
+    if (messages && messages.length > 0) {
+      socket.emit("messages", messages);
+    }
   },
   addFriend: async (socket, friendName, cb) => {
     try {
@@ -75,6 +93,7 @@ module.exports = {
     }
   },
   onDisconnect: async (socket) => {
+    console.log("Disconnecting from socket server...")
     // update status in redis
     await redisClient.hset(
       `userId:${socket.user.username}`,
@@ -92,6 +111,14 @@ module.exports = {
       friends.map((friend) => friend.userId)
     );
     socket.to(friendRooms).emit("connected", false, socket.user.username);
+  },
+  dm: async (socket, message) => {
+    message.from = socket.user.id;
+    // to.from.content
+    const messageString = [message.to, message.from, message.content].join(".");
+    await redisClient.lpush(`chat:${message.to}`, messageString);
+    await redisClient.lpush(`chat:${message.from}`, messageString);
+    socket.to(message.to).emit("dm", message);
   },
 };
 

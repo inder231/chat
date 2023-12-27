@@ -18,6 +18,7 @@ import AddFriendModal from "./AddFriendModal";
 const Sidebar = () => {
   const { friendList } = useContext(FriendContext);
   const { onOpen, isOpen, onClose } = useDisclosure();
+  console.log(friendList);
   return (
     <>
       <VStack py="1rem">
@@ -29,10 +30,10 @@ const Sidebar = () => {
         </HStack>
         <Divider />
         <VStack as={TabList}>
-          {friendList?.map((friend:IFriend, i:number) => (
+          {friendList?.map((friend: IFriend, i: number) => (
             <HStack key={i} as={Tab} justify="space-between" w="100%">
               <Circle
-                bg={friend?.connected ? "green.500" : "red.500"}
+                bg={friend?.connected === "1" ? "green.500" : "red.500"}
                 color="white"
                 size="15px"
               />

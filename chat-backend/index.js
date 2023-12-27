@@ -16,6 +16,7 @@ const {
   initializeUser,
   addFriend,
   onDisconnect,
+  dm,
 } = require("./controllers/socketController");
 
 const app = express();
@@ -31,8 +32,8 @@ app.use(helmet());
 app.use(cors(corsConfig));
 app.use(express.json());
 app.use(sessionMiddleware);
-
 app.use("/auth", authRouter);
+app.set("trust proxy", 1);
 
 io.use(wrap(sessionMiddleware));
 io.use(authorizeUser);
@@ -42,6 +43,8 @@ io.on("connect", (socket) => {
   socket.on("add_friend", (friendName, cb) => {
     addFriend(socket, friendName, cb);
   });
+
+  socket.on("dm", (message) => dm(socket, message));
 
   socket.on("disconnecting", () => onDisconnect(socket));
 });
@@ -54,7 +57,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  res.locals.error = req.app.get("NODE_ENV") === "development" ? err : {};
 
   res
     .status(err.status || 500)
@@ -69,6 +72,6 @@ app.use((err, req, res, next) => {
     .catch((err) => console.log(`Error connecting to db: ${err.message}`));
 })();
 
-server.listen(4000, () => {
-  console.log(`Listening on port 4000`);
+server.listen(process.env.PORT || 4000, () => {
+  console.log(`Listening on port ${process.env.PORT || 4000}`);
 });

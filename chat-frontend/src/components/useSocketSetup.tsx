@@ -5,7 +5,7 @@ import socket from "../socket";
 import { AccountContext } from "../context/AccountContext";
 import { IFriend } from "../pages/Home";
 
-const useSocketSetup = (setFriendList: any) => {
+const useSocketSetup = (setFriendList: any, setMessages: any) => {
   //@ts-expect-error
   const { setUser } = useContext(AccountContext);
   useEffect(() => {
@@ -19,6 +19,14 @@ const useSocketSetup = (setFriendList: any) => {
     });
     socket.on("friends", (friendList) => {
       setFriendList(friendList);
+    });
+
+    socket.on("messages", (messages) => {
+      setMessages(messages);
+    });
+
+    socket.on("dm", (message) => {
+      setMessages((prevMsgs) => [message, ...prevMsgs]);
     });
 
     socket.on("connected", (status, username) => {
@@ -46,8 +54,11 @@ const useSocketSetup = (setFriendList: any) => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("connect_error");
+      socket.off("connected");
+      socket.off("friends");
+      socket.off("messages");
     };
-  }, [setUser, setFriendList]);
+  }, [setUser, setFriendList, setMessages]);
 };
 
 export default useSocketSetup;

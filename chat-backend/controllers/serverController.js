@@ -11,10 +11,10 @@ const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.ENV === "production",
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     // it allow cookies to be set when we both are no same domain, but in production we need to be none and in development to be lax
-    sameSite: process.env.ENV === "production" ? "none" : "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 1000 * 60 * 60 * 1, // cookie expired after 1hour
   },
 });
