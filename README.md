@@ -15,5 +15,5 @@
 - Express.js
 - Express session
 - SocketIO
-- POstgresSQL
+- MongoDB
 - Redis
