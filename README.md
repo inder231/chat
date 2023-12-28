@@ -4,7 +4,7 @@
 
 ### Frontend
 
-- React
+- React - Vite
 - React Router v6
 - Formik
 - Yup
@@ -15,5 +15,5 @@
 - Express.js
 - Express session
 - SocketIO
-- POstgresSQL
+- MongoDB
 - Redis
