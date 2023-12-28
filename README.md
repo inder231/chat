@@ -4,7 +4,7 @@
 
 ### Frontend
 
-- React
+- React - Vite
 - React Router v6
 - Formik
 - Yup
